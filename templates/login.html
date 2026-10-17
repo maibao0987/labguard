@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block content %}
+<div class="login-layout"><div><div class="eyebrow">LEARN · VERIFY · REMEDIATE</div><h1>把每一次發現，<br>變成可驗證的修復。</h1><p class="lead">從隔離實驗到弱點追蹤，建立你的第一條攻防工作流程。</p><div class="quiet-panel"><span class="dot"></span> {{ '管理平台' if service == 'manager' else service + ' 教學版本' }}<p>本網站為隔離資安教學環境，僅含虛構資料。</p></div></div>
+<section class="card login-card"><div class="eyebrow">WELCOME BACK</div><h2>登入工作空間</h2><p class="muted">{{ '使用啟動時產生的管理員密碼。' if service == 'manager' else '教學帳號 alice / bob / admin，密碼 LabOnly-12345。' }}</p><form method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><label>帳號<input name="username" required autocomplete="username"></label><label>密碼<input type="password" name="password" required autocomplete="current-password"></label><button class="button full">進入實驗室 →</button></form><p class="caption">僅連接本機；不接受外部掃描目標。</p></section></div>
+{% endblock %}
+

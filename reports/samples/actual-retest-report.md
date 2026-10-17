@@ -1,0 +1,1122 @@
+# LabGuard 本機攻防報告
+
+## 執行摘要
+
+共 4 筆弱點紀錄。
+
+## 方法與限制
+
+僅本機固定案例；XSS 自動檢查僅驗證 HTML 注入。失敗或未執行不代表安全。
+
+## 授權、弱點、證據與複測完整紀錄
+
+```json
+{
+  "project": "LabGuard",
+  "generated_at": "2026-10-16T06:42:51.522504+00:00",
+  "version": "0.1.0",
+  "scope": [
+    {
+      "id": 1,
+      "name": "本人本機 TaskBoard 實驗室",
+      "owner": "本機操作者",
+      "authorization_reference": "docs/authorization.md",
+      "valid_from": "2026-10-16T06:42:48.411523+00:00",
+      "valid_until": "2026-10-17T06:42:48.411523+00:00",
+      "allowed_assets": "[\"taskboard-vulnerable\", \"taskboard-fixed\"]",
+      "allowed_checks": "[\"health\", \"headers\", \"idor\", \"sqli\", \"xss\"]",
+      "max_concurrency": 1,
+      "rate": 2,
+      "enabled": true
+    }
+  ],
+  "limitations": "僅本機固定案例；XSS 自動檢查僅驗證 HTML 注入。失敗或未執行不代表安全。",
+  "assets": [
+    {
+      "id": 2,
+      "key": "taskboard-fixed",
+      "enabled": true
+    },
+    {
+      "id": 1,
+      "key": "taskboard-vulnerable",
+      "enabled": true
+    }
+  ],
+  "findings": [
+    {
+      "id": 4,
+      "asset_id": 1,
+      "title": "留言未編碼輸出，存在 Stored XSS 風險",
+      "category": "xss",
+      "cwe_id": "CWE-79",
+      "severity": "medium",
+      "confidence": "needs_review",
+      "status": "new",
+      "location": "/tasks/3",
+      "parameter": "body",
+      "description": "隔離種子資料中的受控檢查結果，需人工確認。",
+      "impact": "僅驗證本實驗室假資料；不推定其他系統影響。",
+      "reproduction": "參閱 docs/cases 與關聯工作。",
+      "remediation": "使用 Jinja 自動輸出編碼，不對不可信留言使用 safe。",
+      "check_id": "xss",
+      "method": "POST",
+      "fingerprint": "0b664c841d736ce43325845cab7584e5d5c780c1c7667b3e25e2f1f35f7dc7bb",
+      "first_seen": "2026-10-16T06:33:41.519740+00:00",
+      "last_seen": "2026-10-16T06:41:42.423258+00:00"
+    },
+    {
+      "id": 3,
+      "asset_id": 1,
+      "title": "搜尋條件可改變查詢邏輯",
+      "category": "sqli",
+      "cwe_id": "CWE-89",
+      "severity": "high",
+      "confidence": "needs_review",
+      "status": "new",
+      "location": "/",
+      "parameter": "q",
+      "description": "隔離種子資料中的受控檢查結果，需人工確認。",
+      "impact": "僅驗證本實驗室假資料；不推定其他系統影響。",
+      "reproduction": "參閱 docs/cases 與關聯工作。",
+      "remediation": "使用參數化查詢，保留授權條件。",
+      "check_id": "sqli",
+      "method": "GET",
+      "fingerprint": "6236c99deba1e377659077145208f420e7c58f905ccbaae3fef8ac9aca53013d",
+      "first_seen": "2026-10-16T06:33:38.964898+00:00",
+      "last_seen": "2026-10-16T06:41:39.866398+00:00"
+    },
+    {
+      "id": 2,
+      "asset_id": 1,
+      "title": "可讀取其他成員私人任務",
+      "category": "idor",
+      "cwe_id": "CWE-639",
+      "severity": "high",
+      "confidence": "human_confirmed",
+      "status": "resolved",
+      "location": "/tasks/2",
+      "parameter": "task_id",
+      "description": "隔離種子資料中的受控檢查結果，需人工確認。",
+      "impact": "僅驗證本實驗室假資料；不推定其他系統影響。",
+      "reproduction": "參閱 docs/cases 與關聯工作。",
+      "remediation": "每次讀取任務時驗證擁有者或管理員角色。",
+      "check_id": "idor",
+      "method": "GET",
+      "fingerprint": "bf6e2a090428f5917f81a39a3e477e0caf323d0d1ef6d60e7559ba734589c14c",
+      "first_seen": "2026-10-16T06:33:36.872241+00:00",
+      "last_seen": "2026-10-16T06:41:37.808808+00:00"
+    },
+    {
+      "id": 1,
+      "asset_id": 1,
+      "title": "缺少防禦性安全標頭",
+      "category": "headers",
+      "cwe_id": "CWE-693",
+      "severity": "low",
+      "confidence": "needs_review",
+      "status": "new",
+      "location": "/health",
+      "parameter": "headers",
+      "description": "隔離種子資料中的受控檢查結果，需人工確認。",
+      "impact": "僅驗證本實驗室假資料；不推定其他系統影響。",
+      "reproduction": "參閱 docs/cases 與關聯工作。",
+      "remediation": "依頁面用途設定安全標頭；本機 HTTP 不以 HSTS 缺少評為高風險。",
+      "check_id": "headers",
+      "method": "GET",
+      "fingerprint": "258ddbdd39eacbfb82adc9a9a2dd0bd53b51535bcf15bbedec571e9d4f2929fc",
+      "first_seen": "2026-10-16T06:33:35.259510+00:00",
+      "last_seen": "2026-10-16T06:41:36.210708+00:00"
+    }
+  ],
+  "observations": [
+    {
+      "id": 8,
+      "finding_id": 4,
+      "job_id": 15,
+      "created_at": "2026-10-16T06:41:42.424259+00:00",
+      "source": "worker",
+      "evidence": "儲存的無害 HTML 標記被原樣輸出；此自動檢查只證明 HTML 注入，腳本執行需瀏覽器人工確認。"
+    },
+    {
+      "id": 7,
+      "finding_id": 3,
+      "job_id": 14,
+      "created_at": "2026-10-16T06:41:39.867399+00:00",
+      "source": "worker",
+      "evidence": "固定布林條件使 Alice 搜尋結果包含 Bob 私人任務 ID 2。"
+    },
+    {
+      "id": 6,
+      "finding_id": 2,
+      "job_id": 13,
+      "created_at": "2026-10-16T06:41:37.809808+00:00",
+      "source": "worker",
+      "evidence": "Alice 存取 Bob 任務，回應包含 BOB-PRIVATE-SEED。"
+    },
+    {
+      "id": 5,
+      "finding_id": 1,
+      "job_id": 12,
+      "created_at": "2026-10-16T06:41:36.212241+00:00",
+      "source": "worker",
+      "evidence": "Content-Security-Policy"
+    },
+    {
+      "id": 4,
+      "finding_id": 4,
+      "job_id": 5,
+      "created_at": "2026-10-16T06:33:41.521740+00:00",
+      "source": "worker",
+      "evidence": "儲存的無害 HTML 標記被原樣輸出；此自動檢查只證明 HTML 注入，腳本執行需瀏覽器人工確認。"
+    },
+    {
+      "id": 3,
+      "finding_id": 3,
+      "job_id": 4,
+      "created_at": "2026-10-16T06:33:38.964898+00:00",
+      "source": "worker",
+      "evidence": "固定布林條件使 Alice 搜尋結果包含 Bob 私人任務 ID 2。"
+    },
+    {
+      "id": 2,
+      "finding_id": 2,
+      "job_id": 3,
+      "created_at": "2026-10-16T06:33:36.873241+00:00",
+      "source": "worker",
+      "evidence": "Alice 存取 Bob 任務，回應包含 BOB-PRIVATE-SEED。"
+    },
+    {
+      "id": 1,
+      "finding_id": 1,
+      "job_id": 2,
+      "created_at": "2026-10-16T06:33:35.261511+00:00",
+      "source": "worker",
+      "evidence": "Content-Security-Policy"
+    }
+  ],
+  "retests": [
+    {
+      "id": 1,
+      "finding_id": 2,
+      "job_id": 21,
+      "created_at": "2026-10-16T06:42:50.835442+00:00",
+      "result": "passed",
+      "detail": "物件授權拒絕成功"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 21,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "idor",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:42:48.429022+00:00",
+      "started_at": "2026-10-16T06:42:49.170777+00:00",
+      "finished_at": "2026-10-16T06:42:50.837443+00:00",
+      "heartbeat_at": "2026-10-16T06:42:50.826193+00:00",
+      "deadline_at": "2026-10-16T06:43:34.170777+00:00",
+      "error_code": null,
+      "summary": "物件授權拒絕成功",
+      "cancel_requested": false,
+      "retest_id": 2
+    },
+    {
+      "id": 20,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "xss",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.466587+00:00",
+      "started_at": "2026-10-16T06:41:46.165329+00:00",
+      "finished_at": "2026-10-16T06:41:48.713841+00:00",
+      "heartbeat_at": "2026-10-16T06:41:48.708841+00:00",
+      "deadline_at": "2026-10-16T06:42:31.165329+00:00",
+      "error_code": null,
+      "summary": "留言標記已輸出編碼",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 19,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "sqli",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.454732+00:00",
+      "started_at": "2026-10-16T06:41:44.114435+00:00",
+      "finished_at": "2026-10-16T06:41:46.159812+00:00",
+      "heartbeat_at": "2026-10-16T06:41:46.154583+00:00",
+      "deadline_at": "2026-10-16T06:42:29.114435+00:00",
+      "error_code": null,
+      "summary": "固定 SQLi 案例未繞過查詢",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 18,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "idor",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.441761+00:00",
+      "started_at": "2026-10-16T06:41:42.546310+00:00",
+      "finished_at": "2026-10-16T06:41:44.109435+00:00",
+      "heartbeat_at": "2026-10-16T06:41:44.104435+00:00",
+      "deadline_at": "2026-10-16T06:42:27.546310+00:00",
+      "error_code": null,
+      "summary": "物件授權拒絕成功",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 17,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "headers",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.423674+00:00",
+      "started_at": "2026-10-16T06:41:42.478306+00:00",
+      "finished_at": "2026-10-16T06:41:42.540311+00:00",
+      "heartbeat_at": "2026-10-16T06:41:42.535308+00:00",
+      "deadline_at": "2026-10-16T06:42:27.479308+00:00",
+      "error_code": null,
+      "summary": "安全標頭檢查完成；未檢查 HSTS",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 16,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "health",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.412674+00:00",
+      "started_at": "2026-10-16T06:41:42.429275+00:00",
+      "finished_at": "2026-10-16T06:41:42.473185+00:00",
+      "heartbeat_at": "2026-10-16T06:41:42.468203+00:00",
+      "deadline_at": "2026-10-16T06:42:27.429275+00:00",
+      "error_code": null,
+      "summary": "服務健康；不代表沒有漏洞",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 15,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "xss",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.400927+00:00",
+      "started_at": "2026-10-16T06:41:39.872945+00:00",
+      "finished_at": "2026-10-16T06:41:42.424259+00:00",
+      "heartbeat_at": "2026-10-16T06:41:42.418259+00:00",
+      "deadline_at": "2026-10-16T06:42:24.872945+00:00",
+      "error_code": null,
+      "summary": "HTML 注入已觀測；需人工驗證 XSS",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 14,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "sqli",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.386926+00:00",
+      "started_at": "2026-10-16T06:41:37.814809+00:00",
+      "finished_at": "2026-10-16T06:41:39.867399+00:00",
+      "heartbeat_at": "2026-10-16T06:41:39.861398+00:00",
+      "deadline_at": "2026-10-16T06:42:22.814809+00:00",
+      "error_code": null,
+      "summary": "SQLi 已觀測",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 13,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "idor",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.372701+00:00",
+      "started_at": "2026-10-16T06:41:36.221443+00:00",
+      "finished_at": "2026-10-16T06:41:37.809808+00:00",
+      "heartbeat_at": "2026-10-16T06:41:37.802808+00:00",
+      "deadline_at": "2026-10-16T06:42:21.221443+00:00",
+      "error_code": null,
+      "summary": "IDOR 已觀測",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 12,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "headers",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.357129+00:00",
+      "started_at": "2026-10-16T06:41:36.125236+00:00",
+      "finished_at": "2026-10-16T06:41:36.212241+00:00",
+      "heartbeat_at": "2026-10-16T06:41:36.201708+00:00",
+      "deadline_at": "2026-10-16T06:42:21.125236+00:00",
+      "error_code": null,
+      "summary": "安全標頭檢查完成；未檢查 HSTS",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 11,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "health",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:41:35.343119+00:00",
+      "started_at": "2026-10-16T06:41:36.004381+00:00",
+      "finished_at": "2026-10-16T06:41:36.117237+00:00",
+      "heartbeat_at": "2026-10-16T06:41:36.107078+00:00",
+      "deadline_at": "2026-10-16T06:42:21.004381+00:00",
+      "error_code": null,
+      "summary": "服務健康；不代表沒有漏洞",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 10,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "xss",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.312395+00:00",
+      "started_at": "2026-10-16T06:33:45.300185+00:00",
+      "finished_at": "2026-10-16T06:33:47.924554+00:00",
+      "heartbeat_at": "2026-10-16T06:33:47.915046+00:00",
+      "deadline_at": "2026-10-16T06:34:30.300185+00:00",
+      "error_code": null,
+      "summary": "留言標記已輸出編碼",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 9,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "sqli",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.301259+00:00",
+      "started_at": "2026-10-16T06:33:43.236368+00:00",
+      "finished_at": "2026-10-16T06:33:45.294185+00:00",
+      "heartbeat_at": "2026-10-16T06:33:45.288052+00:00",
+      "deadline_at": "2026-10-16T06:34:28.236368+00:00",
+      "error_code": null,
+      "summary": "固定 SQLi 案例未繞過查詢",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 8,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "idor",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.290260+00:00",
+      "started_at": "2026-10-16T06:33:41.660166+00:00",
+      "finished_at": "2026-10-16T06:33:43.230546+00:00",
+      "heartbeat_at": "2026-10-16T06:33:43.224160+00:00",
+      "deadline_at": "2026-10-16T06:34:26.660166+00:00",
+      "error_code": null,
+      "summary": "物件授權拒絕成功",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 7,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "headers",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.279080+00:00",
+      "started_at": "2026-10-16T06:33:41.594047+00:00",
+      "finished_at": "2026-10-16T06:33:41.654166+00:00",
+      "heartbeat_at": "2026-10-16T06:33:41.648167+00:00",
+      "deadline_at": "2026-10-16T06:34:26.594047+00:00",
+      "error_code": null,
+      "summary": "安全標頭檢查完成；未檢查 HSTS",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 6,
+      "scope_id": 1,
+      "asset_id": 2,
+      "check_type": "health",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.268078+00:00",
+      "started_at": "2026-10-16T06:33:41.526740+00:00",
+      "finished_at": "2026-10-16T06:33:41.589047+00:00",
+      "heartbeat_at": "2026-10-16T06:33:41.583048+00:00",
+      "deadline_at": "2026-10-16T06:34:26.526740+00:00",
+      "error_code": null,
+      "summary": "服務健康；不代表沒有漏洞",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 5,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "xss",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.256418+00:00",
+      "started_at": "2026-10-16T06:33:38.970898+00:00",
+      "finished_at": "2026-10-16T06:33:41.521740+00:00",
+      "heartbeat_at": "2026-10-16T06:33:41.513850+00:00",
+      "deadline_at": "2026-10-16T06:34:23.970898+00:00",
+      "error_code": null,
+      "summary": "HTML 注入已觀測；需人工驗證 XSS",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 4,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "sqli",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.240337+00:00",
+      "started_at": "2026-10-16T06:33:36.880241+00:00",
+      "finished_at": "2026-10-16T06:33:38.964898+00:00",
+      "heartbeat_at": "2026-10-16T06:33:38.959160+00:00",
+      "deadline_at": "2026-10-16T06:34:21.880241+00:00",
+      "error_code": null,
+      "summary": "SQLi 已觀測",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 3,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "idor",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.228338+00:00",
+      "started_at": "2026-10-16T06:33:35.271510+00:00",
+      "finished_at": "2026-10-16T06:33:36.873241+00:00",
+      "heartbeat_at": "2026-10-16T06:33:36.862823+00:00",
+      "deadline_at": "2026-10-16T06:34:20.271510+00:00",
+      "error_code": null,
+      "summary": "IDOR 已觀測",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 2,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "headers",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.215337+00:00",
+      "started_at": "2026-10-16T06:33:35.173329+00:00",
+      "finished_at": "2026-10-16T06:33:35.261511+00:00",
+      "heartbeat_at": "2026-10-16T06:33:35.247060+00:00",
+      "deadline_at": "2026-10-16T06:34:20.173329+00:00",
+      "error_code": null,
+      "summary": "安全標頭檢查完成；未檢查 HSTS",
+      "cancel_requested": false,
+      "retest_id": null
+    },
+    {
+      "id": 1,
+      "scope_id": 1,
+      "asset_id": 1,
+      "check_type": "health",
+      "status": "succeeded",
+      "requested_by": "admin",
+      "created_at": "2026-10-16T06:33:34.201333+00:00",
+      "started_at": "2026-10-16T06:33:35.041659+00:00",
+      "finished_at": "2026-10-16T06:33:35.158039+00:00",
+      "heartbeat_at": "2026-10-16T06:33:35.139867+00:00",
+      "deadline_at": "2026-10-16T06:34:20.041659+00:00",
+      "error_code": null,
+      "summary": "服務健康；不代表沒有漏洞",
+      "cancel_requested": false,
+      "retest_id": null
+    }
+  ],
+  "history": [
+    {
+      "id": 69,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:42:51.485918+00:00"
+    },
+    {
+      "id": 68,
+      "actor": "worker",
+      "action": "retest",
+      "entity": "finding:2",
+      "reason": "物件授權拒絕成功",
+      "created_at": "2026-10-16T06:42:50.837443+00:00"
+    },
+    {
+      "id": 67,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:42:50.473577+00:00"
+    },
+    {
+      "id": 66,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:42:49.460683+00:00"
+    },
+    {
+      "id": 65,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:42:48.448683+00:00"
+    },
+    {
+      "id": 64,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:21",
+      "reason": "idor",
+      "created_at": "2026-10-16T06:42:48.430021+00:00"
+    },
+    {
+      "id": 63,
+      "actor": "admin",
+      "action": "authorize_24h",
+      "entity": "scope:1",
+      "reason": "本人擁有本機實驗室並授權原資產複測",
+      "created_at": "2026-10-16T06:42:48.412689+00:00"
+    },
+    {
+      "id": 62,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:42:48.374859+00:00"
+    },
+    {
+      "id": 61,
+      "actor": "admin",
+      "action": "finding_status",
+      "entity": "finding:2",
+      "reason": "in_progress → ready_for_retest: 人工比對 Alice 與 Bob 假資料及授權行為",
+      "created_at": "2026-10-16T06:41:50.349570+00:00"
+    },
+    {
+      "id": 60,
+      "actor": "admin",
+      "action": "finding_status",
+      "entity": "finding:2",
+      "reason": "confirmed → in_progress: 人工比對 Alice 與 Bob 假資料及授權行為",
+      "created_at": "2026-10-16T06:41:50.336568+00:00"
+    },
+    {
+      "id": 59,
+      "actor": "admin",
+      "action": "finding_status",
+      "entity": "finding:2",
+      "reason": "new → confirmed: 人工比對 Alice 與 Bob 假資料及授權行為",
+      "created_at": "2026-10-16T06:41:50.319159+00:00"
+    },
+    {
+      "id": 58,
+      "actor": "admin",
+      "action": "authorize_24h",
+      "entity": "scope:1",
+      "reason": "本人擁有本機實驗室並授權原資產複測",
+      "created_at": "2026-10-16T06:41:50.300160+00:00"
+    },
+    {
+      "id": 57,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:50.262964+00:00"
+    },
+    {
+      "id": 56,
+      "actor": "admin",
+      "action": "revoke",
+      "entity": "scope:1",
+      "reason": "立即停止後續檢查",
+      "created_at": "2026-10-16T06:41:49.696679+00:00"
+    },
+    {
+      "id": 55,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "md",
+      "created_at": "2026-10-16T06:41:49.681084+00:00"
+    },
+    {
+      "id": 54,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:49.646047+00:00"
+    },
+    {
+      "id": 53,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:48.636395+00:00"
+    },
+    {
+      "id": 52,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:47.621341+00:00"
+    },
+    {
+      "id": 51,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:46.609869+00:00"
+    },
+    {
+      "id": 50,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:45.595575+00:00"
+    },
+    {
+      "id": 49,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:44.584680+00:00"
+    },
+    {
+      "id": 48,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:43.572132+00:00"
+    },
+    {
+      "id": 47,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:42.562556+00:00"
+    },
+    {
+      "id": 46,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:41.552508+00:00"
+    },
+    {
+      "id": 45,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:40.542221+00:00"
+    },
+    {
+      "id": 44,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:39.531544+00:00"
+    },
+    {
+      "id": 43,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:38.516801+00:00"
+    },
+    {
+      "id": 42,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:37.506263+00:00"
+    },
+    {
+      "id": 41,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:36.494225+00:00"
+    },
+    {
+      "id": 40,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:41:35.476587+00:00"
+    },
+    {
+      "id": 39,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:20",
+      "reason": "xss",
+      "created_at": "2026-10-16T06:41:35.467589+00:00"
+    },
+    {
+      "id": 38,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:19",
+      "reason": "sqli",
+      "created_at": "2026-10-16T06:41:35.456560+00:00"
+    },
+    {
+      "id": 37,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:18",
+      "reason": "idor",
+      "created_at": "2026-10-16T06:41:35.442761+00:00"
+    },
+    {
+      "id": 36,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:17",
+      "reason": "headers",
+      "created_at": "2026-10-16T06:41:35.424727+00:00"
+    },
+    {
+      "id": 35,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:16",
+      "reason": "health",
+      "created_at": "2026-10-16T06:41:35.413674+00:00"
+    },
+    {
+      "id": 34,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:15",
+      "reason": "xss",
+      "created_at": "2026-10-16T06:41:35.402241+00:00"
+    },
+    {
+      "id": 33,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:14",
+      "reason": "sqli",
+      "created_at": "2026-10-16T06:41:35.388925+00:00"
+    },
+    {
+      "id": 32,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:13",
+      "reason": "idor",
+      "created_at": "2026-10-16T06:41:35.375702+00:00"
+    },
+    {
+      "id": 31,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:12",
+      "reason": "headers",
+      "created_at": "2026-10-16T06:41:35.360129+00:00"
+    },
+    {
+      "id": 30,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:11",
+      "reason": "health",
+      "created_at": "2026-10-16T06:41:35.345916+00:00"
+    },
+    {
+      "id": 29,
+      "actor": "admin",
+      "action": "authorize_24h",
+      "entity": "scope:1",
+      "reason": "本人擁有此隔離實驗室並授權固定檢查",
+      "created_at": "2026-10-16T06:41:35.316497+00:00"
+    },
+    {
+      "id": 28,
+      "actor": "admin",
+      "action": "revoke",
+      "entity": "scope:1",
+      "reason": "立即停止後續檢查",
+      "created_at": "2026-10-16T06:33:48.531905+00:00"
+    },
+    {
+      "id": 27,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "md",
+      "created_at": "2026-10-16T06:33:48.520587+00:00"
+    },
+    {
+      "id": 26,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:48.509536+00:00"
+    },
+    {
+      "id": 25,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:47.499517+00:00"
+    },
+    {
+      "id": 24,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:46.488639+00:00"
+    },
+    {
+      "id": 23,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:45.478859+00:00"
+    },
+    {
+      "id": 22,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:44.463887+00:00"
+    },
+    {
+      "id": 21,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:43.452463+00:00"
+    },
+    {
+      "id": 20,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:42.441194+00:00"
+    },
+    {
+      "id": 19,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:41.432592+00:00"
+    },
+    {
+      "id": 18,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:40.423139+00:00"
+    },
+    {
+      "id": 17,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:39.412869+00:00"
+    },
+    {
+      "id": 16,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:38.402036+00:00"
+    },
+    {
+      "id": 15,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:37.367613+00:00"
+    },
+    {
+      "id": 14,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:36.355876+00:00"
+    },
+    {
+      "id": 13,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:35.342928+00:00"
+    },
+    {
+      "id": 12,
+      "actor": "admin",
+      "action": "export",
+      "entity": "report",
+      "reason": "json",
+      "created_at": "2026-10-16T06:33:34.323402+00:00"
+    },
+    {
+      "id": 11,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:10",
+      "reason": "xss",
+      "created_at": "2026-10-16T06:33:34.313393+00:00"
+    },
+    {
+      "id": 10,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:9",
+      "reason": "sqli",
+      "created_at": "2026-10-16T06:33:34.302261+00:00"
+    },
+    {
+      "id": 9,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:8",
+      "reason": "idor",
+      "created_at": "2026-10-16T06:33:34.291259+00:00"
+    },
+    {
+      "id": 8,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:7",
+      "reason": "headers",
+      "created_at": "2026-10-16T06:33:34.280282+00:00"
+    },
+    {
+      "id": 7,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:6",
+      "reason": "health",
+      "created_at": "2026-10-16T06:33:34.268078+00:00"
+    },
+    {
+      "id": 6,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:5",
+      "reason": "xss",
+      "created_at": "2026-10-16T06:33:34.257417+00:00"
+    },
+    {
+      "id": 5,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:4",
+      "reason": "sqli",
+      "created_at": "2026-10-16T06:33:34.241336+00:00"
+    },
+    {
+      "id": 4,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:3",
+      "reason": "idor",
+      "created_at": "2026-10-16T06:33:34.229337+00:00"
+    },
+    {
+      "id": 3,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:2",
+      "reason": "headers",
+      "created_at": "2026-10-16T06:33:34.217333+00:00"
+    },
+    {
+      "id": 2,
+      "actor": "admin",
+      "action": "enqueue",
+      "entity": "job:1",
+      "reason": "health",
+      "created_at": "2026-10-16T06:33:34.202333+00:00"
+    },
+    {
+      "id": 1,
+      "actor": "admin",
+      "action": "authorize_24h",
+      "entity": "scope:1",
+      "reason": "本人擁有此隔離實驗室並授權固定檢查",
+      "created_at": "2026-10-16T06:33:34.181300+00:00"
+    }
+  ]
+}
+```

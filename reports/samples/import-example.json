@@ -1,0 +1,21 @@
+{
+  "asset_id": 1,
+  "findings": [
+    {
+      "title": "可讀取其他成員私人任務",
+      "check_id": "idor",
+      "method": "GET",
+      "location": "/tasks/2",
+      "parameter": "task_id",
+      "severity": "high",
+      "category": "idor",
+      "cwe_id": "CWE-639",
+      "description": "本機假帳號 Alice 可以讀取 Bob 私人任務。",
+      "impact": "僅限實驗室假資料；沒有對外系統測試。",
+      "reproduction": "Alice 登入後存取 /tasks/2，比對預期 403 與實際結果。",
+      "remediation": "在每次物件讀取時驗證擁有者或管理員角色。",
+      "evidence": "假資料標記 BOB-PRIVATE-SEED"
+    }
+  ]
+}
+

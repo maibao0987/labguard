@@ -1,0 +1,10 @@
+name: 本人本機 TaskBoard 實驗室
+owner: 本機操作者
+authorization_reference: docs/authorization.md
+allowed_asset_ids: [taskboard-vulnerable, taskboard-fixed]
+allowed_check_types: [health, headers, idor, sqli, xss]
+max_concurrency: 1
+request_rate_limit: 2
+validity_hours: 24
+# 初次啟動後，需在平台明確啟用授權範圍才可入列。
+

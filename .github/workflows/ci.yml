@@ -1,0 +1,30 @@
+name: Local lab verification
+on: [push, pull_request]
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-dev.lock
+      - run: ruff check labguard tests scripts
+      - run: pytest -q
+      - run: python scripts/check_compose.py
+  postgres-lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-dev.lock
+      - name: Generate temporary fake-lab secrets
+        run: python scripts/setup_env.py
+      - run: docker compose -p labguard up --build -d --wait
+      - name: Health and isolation checks (own services only)
+        run: |
+          docker compose -p labguard exec -T worker python scripts/check_isolation.py
+          python scripts/smoke.py
+      - if: always()
+        run: docker compose -p labguard down --volumes
+

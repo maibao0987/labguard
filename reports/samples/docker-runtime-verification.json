@@ -1,0 +1,104 @@
+{
+  "containers": [
+    {
+      "service": "fixed-db",
+      "status": "running",
+      "health": "healthy",
+      "localhost_ports": {},
+      "networks": [
+        "labguard_fixed_data_net"
+      ]
+    },
+    {
+      "service": "fixed-web",
+      "status": "running",
+      "health": "healthy",
+      "localhost_ports": {},
+      "networks": [
+        "labguard_fixed_data_net",
+        "labguard_lab_net"
+      ]
+    },
+    {
+      "service": "gateway",
+      "status": "running",
+      "health": "healthy",
+      "localhost_ports": {
+        "5000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "5100"
+          }
+        ],
+        "5001/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "5101"
+          }
+        ],
+        "5002/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "5102"
+          }
+        ]
+      },
+      "networks": [
+        "labguard_ingress_net",
+        "labguard_lab_net",
+        "labguard_management_net"
+      ]
+    },
+    {
+      "service": "manager",
+      "status": "running",
+      "health": "healthy",
+      "localhost_ports": {},
+      "networks": [
+        "labguard_management_net"
+      ]
+    },
+    {
+      "service": "manager-db",
+      "status": "running",
+      "health": "healthy",
+      "localhost_ports": {},
+      "networks": [
+        "labguard_management_net"
+      ]
+    },
+    {
+      "service": "vulnerable-db",
+      "status": "running",
+      "health": "healthy",
+      "localhost_ports": {},
+      "networks": [
+        "labguard_vulnerable_data_net"
+      ]
+    },
+    {
+      "service": "vulnerable-web",
+      "status": "running",
+      "health": "healthy",
+      "localhost_ports": {},
+      "networks": [
+        "labguard_lab_net",
+        "labguard_vulnerable_data_net"
+      ]
+    },
+    {
+      "service": "worker",
+      "status": "running",
+      "health": "worker verified through jobs",
+      "localhost_ports": {},
+      "networks": [
+        "labguard_lab_net",
+        "labguard_management_net"
+      ]
+    }
+  ],
+  "all_lab_and_data_networks_internal": true,
+  "limitations": [
+    "Host-gateway reachability and kernel isolation are not proved."
+  ]
+}

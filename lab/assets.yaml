@@ -1,0 +1,8 @@
+# Reviewed registry. Never accept URLs from requests.
+docker:
+  taskboard-vulnerable: {host: vulnerable-web, ip: 172.30.77.10, port: 5000, mode: vulnerable}
+  taskboard-fixed: {host: fixed-web, ip: 172.30.77.11, port: 5000, mode: fixed}
+local:
+  taskboard-vulnerable: {host: 127.0.0.1, ip: 127.0.0.1, port: 5101, mode: vulnerable}
+  taskboard-fixed: {host: 127.0.0.1, ip: 127.0.0.1, port: 5102, mode: fixed}
+

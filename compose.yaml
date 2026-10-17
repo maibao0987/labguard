@@ -1,0 +1,128 @@
+name: labguard
+x-app: &app
+  build: .
+  image: labguard-local:0.1.0
+  user: "10001:10001"
+  read_only: true
+  tmpfs: ["/tmp:size=32m,noexec,nosuid"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 80
+  mem_limit: 256m
+  cpus: 0.5
+  restart: "no"
+x-pg: &pg
+  image: postgres:17-bookworm
+  security_opt: [no-new-privileges:true]
+  pids_limit: 100
+  mem_limit: 256m
+  cpus: 0.5
+  healthcheck:
+    test: [CMD-SHELL, "pg_isready -U labguard -d labguard"]
+    interval: 3s
+    timeout: 3s
+    retries: 25
+services:
+  manager-db:
+    <<: *pg
+    environment: {POSTGRES_USER: labguard, POSTGRES_DB: labguard, POSTGRES_PASSWORD: "${MANAGER_DB_PASSWORD:?Run scripts/setup.ps1 first}"}
+    networks: [management_net]
+    volumes: [manager_data:/var/lib/postgresql/data]
+  vulnerable-db:
+    <<: *pg
+    environment: {POSTGRES_USER: labguard, POSTGRES_DB: labguard, POSTGRES_PASSWORD: "${VULNERABLE_DB_PASSWORD:?Run setup}"}
+    networks: [vulnerable_data_net]
+    volumes: [vulnerable_data:/var/lib/postgresql/data]
+  fixed-db:
+    <<: *pg
+    environment: {POSTGRES_USER: labguard, POSTGRES_DB: labguard, POSTGRES_PASSWORD: "${FIXED_DB_PASSWORD:?Run setup}"}
+    networks: [fixed_data_net]
+    volumes: [fixed_data:/var/lib/postgresql/data]
+  manager:
+    <<: *app
+    command: [sh, -c, "python -m labguard.cli init --service manager && python -m labguard.cli serve --service manager --container"]
+    environment:
+      DATABASE_URL: "postgresql+psycopg://labguard:${MANAGER_DB_PASSWORD}@manager-db/labguard"
+      SECRET_KEY: "${MANAGER_SECRET:?Run setup}"
+      MANAGER_PASSWORD: "${MANAGER_PASSWORD:?Run setup}"
+      LAB_PROFILE: docker
+    networks: [management_net]
+    depends_on: {manager-db: {condition: service_healthy}}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health',timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 25
+  vulnerable-web:
+    <<: *app
+    # REPAIRED_SERVICE=fixed lets you repair the ORIGINAL asset, preserving identity.
+    command: [sh, -c, "python -m labguard.cli init --service $${REPAIRED_SERVICE} && python -m labguard.cli serve --service $${REPAIRED_SERVICE} --container"]
+    environment:
+      DATABASE_URL: "postgresql+psycopg://labguard:${VULNERABLE_DB_PASSWORD}@vulnerable-db/labguard"
+      SECRET_KEY: "${VULNERABLE_SECRET:?Run setup}"
+      REPAIRED_SERVICE: "${REPAIRED_SERVICE:-vulnerable}"
+      COOKIE_NAME: labguard_vulnerable
+    networks:
+      lab_net: {ipv4_address: 172.30.77.10}
+      vulnerable_data_net: {}
+    depends_on: {vulnerable-db: {condition: service_healthy}}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health',timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 25
+  fixed-web:
+    <<: *app
+    command: [sh, -c, "python -m labguard.cli init --service fixed && python -m labguard.cli serve --service fixed --container"]
+    environment:
+      DATABASE_URL: "postgresql+psycopg://labguard:${FIXED_DB_PASSWORD}@fixed-db/labguard"
+      SECRET_KEY: "${FIXED_SECRET:?Run setup}"
+    networks:
+      lab_net: {ipv4_address: 172.30.77.11}
+      fixed_data_net: {}
+    depends_on: {fixed-db: {condition: service_healthy}}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health',timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 25
+  worker:
+    <<: *app
+    command: [python, -m, labguard.cli, worker]
+    environment:
+      DATABASE_URL: "postgresql+psycopg://labguard:${MANAGER_DB_PASSWORD}@manager-db/labguard"
+      LAB_PROFILE: docker
+    networks: [management_net, lab_net]
+    depends_on:
+      manager: {condition: service_healthy}
+      vulnerable-web: {condition: service_healthy}
+      fixed-web: {condition: service_healthy}
+  gateway:
+    <<: *app
+    command: [python, -m, labguard.relay]
+    ports: ["127.0.0.1:5100:5000", "127.0.0.1:5101:5001", "127.0.0.1:5102:5002"]
+    networks: [ingress_net, management_net, lab_net]
+    sysctls: {net.ipv4.ip_forward: "0"}
+    depends_on:
+      manager: {condition: service_healthy}
+      vulnerable-web: {condition: service_healthy}
+      fixed-web: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health',timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 25
+networks:
+  # Only this fixed TCP relay joins ingress; lab apps/worker keep internal-only networks.
+  ingress_net: {internal: false}
+  management_net: {internal: true}
+  lab_net:
+    internal: true
+    ipam: {config: [{subnet: 172.30.77.0/24}]}
+  vulnerable_data_net: {internal: true}
+  fixed_data_net: {internal: true}
+volumes:
+  manager_data: {}
+  vulnerable_data: {}
+  fixed_data: {}
+
